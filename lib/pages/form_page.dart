@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FormPage extends StatefulWidget {
-  final Map<String, String>? contato;
+  final Map<String, dynamic>? contato;
 
   FormPage({this.contato});
 
@@ -48,12 +48,14 @@ class _FormPageState extends State<FormPage> {
     if (_formKey.currentState!.validate()) {
       String telefoneFormatado = formatarTelefone(removerMascaraTelefone(telefoneController.text));
       Navigator.pop(context, {
-        'nome': nomeController.text,
-        'telefone': telefoneFormatado,
-        'email': emailController.text,
+      'nome': nomeController.text,
+      'telefone': telefoneFormatado,
+      'email': emailController.text,
+      if (widget.contato != null) 'id': widget.contato!['id'],
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
