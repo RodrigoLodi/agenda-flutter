@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'form_page.dart';
+import 'login_page.dart';
 import '../services/db_helper.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,7 +26,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  // Função para adicionar ou editar contato.
+  // Função para adicionar ou editar contato
   void adicionarOuEditarContato({Map<String, dynamic>? contato, int? index}) async {
     final resultado = await Navigator.push(
       context,
@@ -54,10 +56,27 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _logoff(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Agenda Telefônica')),
+      appBar: AppBar(
+        title: Text('Agenda Telefônica'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: () => _logoff(context),
+          ),
+        ],
+      ),
       body: contatos.isEmpty
           ? Center(
               child: Text(

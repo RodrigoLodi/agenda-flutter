@@ -10,6 +10,11 @@ class DBHelper {
   static final String columnTelefone = 'telefone';
   static final String columnEmail = 'email';
 
+
+  static final String tableLogin = 'logins';
+  static final String columnUsername = 'username';
+  static final String columnPassword = 'password';
+
   static Future<Database> getDatabase() async {
     if (_database != null) return _database!;
     _database = await _initDB();
@@ -20,8 +25,9 @@ class DBHelper {
     String path = join(await getDatabasesPath(), 'contatos.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -34,6 +40,26 @@ class DBHelper {
         $columnEmail TEXT NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE $tableLogin (
+        $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
+        $columnUsername TEXT NOT NULL,
+        $columnPassword TEXT NOT NULL
+      )
+    ''');
+  }
+
+  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS $tableLogin (
+          $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
+          $columnUsername TEXT NOT NULL,
+          $columnPassword TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   static Future<int> inserirContato(Map<String, dynamic> contato) async {
@@ -63,5 +89,20 @@ class DBHelper {
       where: '$columnId = ?',
       whereArgs: [id],
     );
+  }
+
+  static Future<int> inserirUsuario(Map<String, dynamic> usuario) async {
+    final db = await getDatabase();
+    return await db.insert(tableLogin, usuario);
+  }
+
+  static Future<Map<String, dynamic>?> buscarUsuario(String username, String password) async {
+    final db = await getDatabase();
+    final result = await db.query(
+      tableLogin,
+      where: '$columnUsername = ? AND $columnPassword = ?',
+      whereArgs: [username, password],
+    );
+    return result.isNotEmpty ? result.first : null;
   }
 }
