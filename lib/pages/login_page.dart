@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/db_helper.dart';
 import 'home_page.dart';
 
@@ -13,23 +13,16 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  final secureStorage = FlutterSecureStorage();
+
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      String username = _usernameController.text;
-      String password = _passwordController.text;
-
-      var usuario = await DBHelper.buscarUsuario(username, password);
-      if (usuario != null) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', username);
-
+        // Armazena o nome do usuário na sessão
+        await secureStorage.write(key: 'session', value: _usernameController.text);
         Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Usuário ou senha incorretos')));
-      }
     }
   }
 
